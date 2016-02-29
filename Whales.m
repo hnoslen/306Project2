@@ -10,6 +10,7 @@ ysteps = 50;
 r = [0.05 0.08];
 K = [150000 400000];
 a = [10^-8 10^-8];
+prices = [12000 6000];
 
 xmax = 1*K(1);
 ymax = 1*K(2);
@@ -47,3 +48,11 @@ y2 = f2(r(2),a(2),K(2),x);
 profitplace = [12000; 6000].*r';
 gradProfit = [24000*(r(1)/K(1)) (12000*a(1))+(6000*a(2)); (12000*a(1))+(6000*a(2)) 12000*(r(2)/K(2))];
 popsToMaxProfit = gradProfit\profitplace;
+
+% problem 11, max sustained profits
+%if (popsToMaxProfit(1) < xmax || popsToMaxProfit(2) < ymax)
+%    newXPop = ((2 * r(1) * k(1)) - 
+%end
+
+% Example call to sensitivity function using anonymous function:
+sensitivity(@(x)dx(x, 100,r(1),K(1),a(1)), 500)
