@@ -37,7 +37,8 @@ ymax = 1*K(2);
 blue_pop_max_growth_rate = (K(1)*(a(1)*K(2)*r(2) - 2*r(1)*r(2) + a(2)*K(2)*r(2)))/(K(1)*K(2)*a(1)^2 + 2*K(1)*K(2)*a(1)*a(2) + K(1)*K(2)*a(2)^2 - 4*r(1)*r(2));
 fin_pop_max_growth_rate = (K(2)*r(1)*(a(1)*K(1) - 2*r(2) + a(2)*K(1)))/(K(1)*K(2)*a(1)^2 + 2*K(1)*K(2)*a(1)*a(2) + K(1)*K(2)*a(2)^2 - 4*r(1)*r(2));
 [blue_pop_int, fin_pop_int] = maxFunctionInt(blue_pop_max_growth_rate, fin_pop_max_growth_rate, @(x,y)(dx(x,y,r(1),K(1),a(1)) + dy(x,y,r(1),K(1),a(1))));
-display(sprintf('The total whale population will grow fastest when there are %d blue whales and %d fin whales',blue_pop_int, fin_pop_int));
+max_growth_rate = dx(blue_pop_int,fin_pop_int,r(1),K(1),a(1)) + dy(blue_pop_int,fin_pop_int,r(2),K(2),a(2));
+display(sprintf('The total whale population will grow fastest when there are %d blue whales and %d fin whales.\nThe population will be growing at a rate of approximately %f whales per year',blue_pop_int, fin_pop_int, max_growth_rate));
 
 % Sensitivity of total population growth rate to blue whale population
 sensitivity(@(x)(dx(x,fin_pop_max_growth_rate,r(1),K(1),a(1)) + dy(x,fin_pop_max_growth_rate,r(2),K(2),a(2))), blue_pop_max_growth_rate)
@@ -52,4 +53,11 @@ sensitivity(@(y)(dy(blue_pop_max_growth_rate,y,r(2),K(2),a(2)) + dx(blue_pop_max
 % TODO
 % also sensitivity
 
+
+% Maximizing yearly (sustainable) profit
+blue_pop_profit = (K(1)*(2*a(1)*K(2)*r(2) - 4*r(1)*r(2) + a(2)*K(2)*r(2)))/(4*K(1)*K(2)*a(1)^2 + 4*K(1)*K(2)*a(1)*a(2) + K(1)*K(2)*a(2)^2 - 8*r(1)*r(2));
+fin_pop_profit = (2*K(2)*r(1)*(2*a(1)*K(1) - 2*r(2) + a(2)*K(1)))/(4*K(1)*K(2)*a(1)^2 + 4*K(1)*K(2)*a(1)*a(2) + K(1)*K(2)*a(2)^2 - 8*r(1)*r(2));
+[blue_profit_int, fin_profit_int] = maxFunctionInt(blue_pop_profit, fin_pop_profit, @(x,y)whaleProfit(a, r, K, x, y, prices));
+max_profit = whaleProfit(a, r, K, blue_profit_int, fin_profit_int, prices);
+display(sprintf('The total whale population will grow fastest when there are %d blue whales and %d fin whales.\nThe population will generate approximately $%.2f in profit per year',blue_profit_int, fin_profit_int, max_profit));
 
