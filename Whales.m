@@ -2,6 +2,7 @@ dx = @(x,y,r1,k1,a1) (r1*x.*(1-(x/k1)))-(a1*x.*y);
 dy = @(x,y,r2,k2,a2) (r2*y.*(1-(y/k2)))-(a2*x.*y);
 gradXY = @(x,y,r,K,a) dx(x,y,r(1),K(1),a(1))+dy(x,y,r(2),K(2),a(2));
 
+profitFunc = @(x,y,r,k,a, priceVec) priceVec(1)*dx(x,y,r(1),k(1),a(1))+priceVec(2)*dy(x,y,r(2),k(2),a(2));
 %both = @(x,y,r,k,a) dx(x,y,r(1),k(1),a(1))+dy(x,y,r(2),k(2),a(2));
 
 xsteps = 50;
