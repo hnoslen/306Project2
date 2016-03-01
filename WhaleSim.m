@@ -1,11 +1,11 @@
 close all
 %Whale pop and profit simulation
 timestep = 1;
-runLength = 500;
+runLength = 200;
 
-pops = [15000; 40000];% Starting population
+pops = [70000; 200000];% Starting population
 whalePrice = [12000; 6000];
-killRatesStart = [0; 0];% Starting rates
+killRatesStart = [0.9; 0.9];% Starting rates
 
 r = [0.05 0.08];
 K = [150000 400000];
@@ -49,15 +49,20 @@ iters = round(runLength/timestep);
 popLog = zeros(iters+1,2);
 popLog(1,:) = pops';
 
+killRateRecord = zeros(iters,2);
 killRates = [0; 0];
-profit = zeros(iters+1,1);
-now = uint64(2);
+profit = zeros(iters,1);
+now = uint64(1);
+
+transitionProfit = 0;
+transitionYears = 0;
+
 while (now <= iters)
     popDelta = change(pops,r,K,a);
     
     %update kill rate
     if pops(1)>popsToMaxProfit(1)
-        killRates(1) = pops(1)-popsToMaxProfit(1);
+        killRates(1) = max(popDelta(1),pops(1)-popsToMaxProfit(1));        
     elseif pops(1)==popsToMaxProfit(1)
         killRates(1) = popDelta(1);
     else
@@ -65,7 +70,7 @@ while (now <= iters)
     end
     
     if pops(2)>popsToMaxProfit(2)
-        killRates(2) = pops(2)-popsToMaxProfit(2);
+        killRates(2) = max(popDelta(2),pops(2)-popsToMaxProfit(2));
     elseif pops(2)==popsToMaxProfit(2)
         killRates(2) = popDelta(2);
     else
@@ -80,9 +85,15 @@ while (now <= iters)
     end
     
     pops = pops+popDelta-killRates;
+    killRatesRecords(now,:) = killRates;
     popLog(now,:) = pops';
     
     profit(now) = sum(whalePrice.*killRates);
+    
+    if (killRates(1)<popDelta(1) || killRates(2)<popDelta(2))
+        transitionProfit = transitionProfit + profit(now);
+        transitionYears = transitionYears + 1;
+    end
     
     if (~pops(1)||~pops(2))
         if (pops(1)<=0)&&(pops(2)<=0)
@@ -98,6 +109,11 @@ while (now <= iters)
     %display(sprintf('%d %d',pops(1),pops(2)))
     now = now+1;
 end
+profit(now) = sum(whalePrice.*killRates);
+popLog(now,:) = pops';
+
+display(sprintf('In transition, the whaling industry averaged $%.2f per year over %d years', transitionProfit / transitionYears, transitionYears));
+
 hold on
 plot(popLog(:,1))
 plot(popLog(:,2),'r')
