@@ -60,4 +60,26 @@ fin_pop_profit = (2*K(2)*r(1)*(2*a(1)*K(1) - 2*r(2) + a(2)*K(1)))/(4*K(1)*K(2)*a
 [blue_profit_int, fin_profit_int] = maxFunctionInt(blue_pop_profit, fin_pop_profit, @(x,y)whaleProfit(a, r, K, x, y, prices));
 max_profit = whaleProfit(a, r, K, blue_profit_int, fin_profit_int, prices);
 display(sprintf('The total whale population will grow fastest when there are %d blue whales and %d fin whales.\nThe population will generate approximately $%.2f in profit per year',blue_profit_int, fin_profit_int, max_profit));
+display(sprintf('These results come out to %.2f%% of the blue whale carrying capacity and %.2f%% of the fin whale carrying capacity.',100 * blue_profit_int / K(1), 100 * fin_profit_int / K(2)));
+
+% Sensitivity of profit to blue whale population
+
+% Sensitivity of profit to fin whale population
+
+% More sensitivity
+
+
+% Determining when it will be economically optimal to drive a species to
+% extinction
+pmaxx = 12000 * r1^2 * k1 * ((2 - r1) / 4);
+pmaxy = 6000 * r2^2 * k2 * ((2 - r2) / 4);
+syms alpha
+cash = whaleProfit([alpha alpha], [r1 r2], [k1 k2], blueProfit, finProfit, [12000 6000]);
+eqn1 = cash == pmaxx;
+eqn2 = cash == pmaxy;
+fin_alpha_max = double(solve(eqn1, alpha));
+blue_alpha_max = double(solve(eqn2, alpha));
+display(sprintf('As long as alpha is less than %.12f it is not optimal to drive fin whales to extinction.\nSimilarly, it alpha is less than %.12f it is not optimal to drive blue whales to extinction',fin_alpha_max, blue_alpha_max));
+
+% Sensitivity analysis
 
