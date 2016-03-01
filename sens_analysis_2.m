@@ -1,3 +1,4 @@
+%sensitivity analysis of blue whale profit to all 6 parameters
 r=.05; %r1
 s=.08; %r2
 K=150000; %K1
