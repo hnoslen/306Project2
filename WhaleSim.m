@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 records = zeros(1,5);
 record_inc = 1;
 for startingpop = 0.5
@@ -152,4 +151,3 @@ hold off
 sum(profit)
 figure
 plot(profit)
->>>>>>> e49662304b85bf44261c98c8e0bb17115989a9a2
