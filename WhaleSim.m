@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 records = zeros(1,5);
 record_inc = 1;
 for startingpop = 0.5
@@ -136,3 +137,19 @@ for startingpop = 0.5
         %plot(profit(1:transitionYears))
     end
 end
+profit(now) = sum(whalePrice.*killRates);
+popLog(now,:) = pops';
+
+display(sprintf('In transition, the whaling industry averaged $%.2f per year over %d years', transitionProfit / transitionYears, transitionYears));
+
+hold on
+plot(popLog(:,1))
+plot(popLog(:,2),'r')
+plot((K(1)/2)*ones(iters,1),'b--')
+plot((K(2)/2)*ones(iters,1),'r--')
+hold off
+
+sum(profit)
+figure
+plot(profit)
+>>>>>>> e49662304b85bf44261c98c8e0bb17115989a9a2
