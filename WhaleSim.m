@@ -1,8 +1,7 @@
 records = zeros(1,5);
 record_inc = 1;
-for startingpop = 0.5
-    for startingKill = 1.1:0.2:2
-        
+for startingpop = 0.1:0.05:0.45
+    for startingKill = 0:0.1:0.9
 
         close all
         %Whale pop and profit simulation
@@ -16,7 +15,8 @@ for startingpop = 0.5
 
         pops = startingpop*K';% Starting population
         whalePrice = [12000; 6000];
-        killRates = [2000; 8000];% Starting rates
+        killRates = zeros(2,1);%[2000; 8000];% Starting rates
+        killRatesStart = startingKill*ones(2,1);
 
         % Diff Eqs
         dx = @(x,y,r1,k1,a1) (r1*x.*(1-(x/k1)))-(a1*x.*y);
@@ -82,14 +82,16 @@ for startingpop = 0.5
 %                 killRates(2) = killRatesStart(2)*popDelta(2);
 %             end
 % 
-%             if killRates(1)<0
-%                 killRates(1) = 0;
-%             end
-%             if killRates(2)<0
-%                 killRates(2) = 0;
-%             end
-
-            pops = pops-killRates+popDelta;
+            killRates = killRatesStart.*popDelta;
+            if killRates(1)<0
+                killRates(1) = 0;
+            end
+            if killRates(2)<0
+                killRates(2) = 0;
+            end
+            
+            
+            pops = pops+popDelta-killRates;
             killRatesRecords(now,:) = killRates;
             popLog(now,:) = pops';
 
@@ -114,6 +116,9 @@ for startingpop = 0.5
                 end
             end
             if all((pops<1))killRates(1)=0;
+                break;
+            end
+            if all(pops>=(0.5*K'))
                 break;
             end
             transitionYears = transitionYears + 1;
