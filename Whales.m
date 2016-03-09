@@ -119,11 +119,12 @@ maxYPos = @(r,s,k,l,a) (l*(2*r*(r*s*(k*r + l*s - a*k*l)*(k*s + l*r - a*k*l))^(1/
 maxYNeg = @(r,s,k,l,a) -(l*(2*r*(r*s*(k*r + l*s - a*k*l)*(k*s + l*r - a*k*l))^(1/2) - 2*k*r*s^2 - 2*l*r^2*s - a*k*(r*s*(k*r + l*s - a*k*l)*(k*s + l*r - a*k*l))^(1/2) + a*k*l*r^2 + a*k^2*r*s - a^2*k^2*l*r + 2*a*k*l*r*s))/(a^3*k^2*l^2 - a^2*k^2*l*s - a^2*k*l^2*r - 4*a*k*l*r*s + 4*k*r*s^2 + 4*l*r^2*s);
 maxY = @(r,k,a) [maxYPos(r(1),r(2),k(1),k(2),sum(a)) maxYNeg(r(1),r(2),k(1),k(2),sum(a))];
 
-mY = maxY(r,K,a);
-mX = zerX(mY,r,K,a);
+y= 0:K(2);
+plot(y,zerX(y,r,K,a))
 
+intersectOLines = @(r,k,a) [(((r(1)*r(2))/k(2))-a(1)*r(2)) (((r(1)*r(2))/k(1))-a(2)*r(1))]/(((r(1)*r(2))/(k(1)*k(2)))-(a(1)*a(2)));
 
-xmax = @(r,K,a) (r(2)-(r(1)/(a(1)*K(1)*K(2))))/(a(2)+(r(1)/(a(1)*K(1)*K(2))));
-ymax = @(xmax,r,k,a) (r(1)/a(1))*(1-(x/k(1)));
+% xmax = @(r,K,a) (r(2)-(r(1)/(a(1)*K(1)*K(2))))/(a(2)+(r(1)/(a(1)*K(1)*K(2))));
+% ymax = @(xmax,r,k,a) (r(1)/a(1))*(1-(xmax/k(1)));
 
 

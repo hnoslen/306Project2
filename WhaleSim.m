@@ -1,8 +1,7 @@
 records = zeros(1,5);
 record_inc = 1;
-for startingpop = 0.5
-    for startingKill = 0.1:0.1:2
-        
+for startingpop = 0.1:0.05:0.45
+    for startingKill = 0:0.1:0.9
 
         close all
         %Whale pop and profit simulation
@@ -16,7 +15,8 @@ for startingpop = 0.5
 
         pops = startingpop*K';% Starting population
         whalePrice = [12000; 6000];
-        killRatesStart = startingKill*ones(1,2);% Starting rates
+        killRates = zeros(2,1);%[2000; 8000];% Starting rates
+        killRatesStart = startingKill*ones(2,1);
 
         % Diff Eqs
         dx = @(x,y,r1,k1,a1) (r1*x.*(1-(x/k1)))-(a1*x.*y);
@@ -56,61 +56,72 @@ for startingpop = 0.5
         popLog(1,:) = pops';
 
         killRateRecord = zeros(iters,2);
-        killRates = [0; 0];
         profit = zeros(iters,1);
         now = uint64(1);
 
         transitionProfit = 0;
         transitionYears = 0;
 
-        while (now <= iters)
+        while true
             popDelta = change(pops,r,K,a);
 
             %update kill rate
-            if pops(1)>popsToMaxProfit(1)
-                killRates(1) = max(popDelta(1),pops(1)-popsToMaxProfit(1));        
-            elseif pops(1)==popsToMaxProfit(1)
-                killRates(1) = popDelta(1);
-            else
-                killRates(1) = killRatesStart(1)*popDelta(1);
-            end
-
-            if pops(2)>popsToMaxProfit(2)
-                killRates(2) = max(popDelta(2),pops(2)-popsToMaxProfit(2));
-            elseif pops(2)==popsToMaxProfit(2)
-                killRates(2) = popDelta(2);
-            else
-                killRates(2) = killRatesStart(2)*popDelta(2);
-            end
-
+%             if pops(1)>popsToMaxProfit(1)
+%                 killRates(1) = max(popDelta(1),pops(1)-popsToMaxProfit(1));        
+%             elseif pops(1)==popsToMaxProfit(1)
+%                 killRates(1) = popDelta(1);
+%             else
+%                 killRates(1) = killRatesStart(1)*popDelta(1);
+%             end
+% 
+%             if pops(2)>popsToMaxProfit(2)
+%                 killRates(2) = max(popDelta(2),pops(2)-popsToMaxProfit(2));
+%             elseif pops(2)==popsToMaxProfit(2)
+%                 killRates(2) = popDelta(2);
+%             else
+%                 killRates(2) = killRatesStart(2)*popDelta(2);
+%             end
+% 
+            killRates = killRatesStart.*popDelta;
             if killRates(1)<0
                 killRates(1) = 0;
             end
             if killRates(2)<0
                 killRates(2) = 0;
             end
-
+            
+            
+            pops = pops+popDelta-killRates;
             killRatesRecords(now,:) = killRates;
             popLog(now,:) = pops';
 
             profit(now) = sum(whalePrice.*killRates);
 
-            if (killRates(1)<popDelta(1) || killRates(2)<popDelta(2))
-                transitionProfit = transitionProfit + profit(now);
-                transitionYears = transitionYears + 1;
-            end
+%             if (killRates(1)<popDelta(1) || killRates(2)<popDelta(2))
+%                 transitionProfit = transitionProfit + profit(now);
+%                 
+%             end
 
-            if (~pops(1)||~pops(2))
+            if any(pops<1)
                 if (pops(1)<=0)&&(pops(2)<=0)
                     pops(1) = 0;
                     pops(2) = 0;
                     break;
                 elseif pops(1)<=0
                     pops(1) = 0;
+                    killRates(1)=0;
                 else
                     pops(2) = 0;
+                    killRates(2)=0;
                 end
             end
+            if all((pops<1))killRates(1)=0;
+                break;
+            end
+            if all(pops>=(0.5*K'))
+                break;
+            end
+            transitionYears = transitionYears + 1;
             %display(sprintf('%d %d',pops(1),pops(2)))
             now = now+1;
         end
