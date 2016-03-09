@@ -5,8 +5,8 @@ gradXY = @(x,y,r,K,a) dx(x,y,r(1),K(1),a(1))+dy(x,y,r(2),K(2),a(2));
 profitFunc = @(x,y,r,k,a, priceVec) priceVec(1)*dx(x,y,r(1),k(1),a(1))+priceVec(2)*dy(x,y,r(2),k(2),a(2));
 %both = @(x,y,r,k,a) dx(x,y,r(1),k(1),a(1))+dy(x,y,r(2),k(2),a(2));
 
-xsteps = 50;
-ysteps = 50;
+xsteps = 30;
+ysteps = 30;
 
 r = [0.05 0.08];
 K = [150000 400000];
@@ -16,21 +16,54 @@ prices = [12000 6000];
 xmax = 1*K(1);
 ymax = 1*K(2);
 
-[x, y] = meshgrid(0:(xmax/xsteps):xmax,ymax:-(ymax/ysteps):0);
+[xold, yold] = meshgrid(0:(xmax/xsteps):xmax,ymax:-(ymax/ysteps):0);
 
-gradX = dx(x,y,r(1),K(1),a(1));
-gradY = dy(x,y,r(2),K(2),a(2));
-
+gradX = dx(xold,yold,r(1),K(1),a(1));
+gradY = dy(xold,yold,r(2),K(2),a(2));
+profit = whaleProfit(a, r, K, xold, yold, prices);
+prof = gradX * prices(1) + gradY * prices(2);
 % prob prob 1
-%surf(gradX+gradY)
+%surf(xold,yold,gradX+gradY)
+%title('Total population growth rate')
+%xlabel('Blue whale population')
+%ylabel('Fin whale population')
+figure
+surf(xold, yold, profit, 'EdgeColor', 'none')
+colormap('gray')
+hold on
+plot3(70619,194703,100000000,'pk')
+plot3([0, xmax], [K(2) / 2, K(2) / 2], [100000000, 100000000], 'k')
+plot3([K(1) / 2, K(1) / 2], [0, ymax], [100000000, 100000000], 'k')
+title('Profit from harvesting at growth rate','FontSize',15)
+xlabel('Blue whale population','FontSize',15)
+ylabel('Fin whale population','FontSize',15)
+hold off
+contour(xold,yold,profit)
+line([0, xmax], [K(2) / 2, K(2) / 2])
+line([K(1) / 2, K(1) / 2], [0, ymax])
+figure
+ymaxline = (r(1) / a(1))-(r(1) / (a(1) * K(1))).*xold(1,:);
+xmaxline = (r(2) / a(2))-(r(2) / (a(2) * K(2))).*yold(:,1); 
+%plot(x,ymaxline)%,'g',xmaxline,y)
+%plot(xmaxline,y)
+%line([(((r(1) * r(2)) / K(2)) - (a(1) * r(2))) / (((r(1) * r(2)) / (K(1) * K(2))) - (a(1) * a(2))), (((r(1) * r(2)) / K(2)) - (a(1) * r(2))) / (((r(1) * r(2)) / (K(1) * K(2))) - (a(1) * a(2)))], [0, ymax])
+%line([0, xmax], [(((r(1) * r(2)) / K(1)) - (a(2) * r(1))) / (((r(1) * r(2)) / (K(1) * K(2))) - (a(1) * a(2))), (((r(1) * r(2)) / K(1)) - (a(2) * r(1))) / (((r(1) * r(2)) / (K(1) * K(2))) - (a(1) * a(2)))])
+title('Profit from harvesting at growth rate','FontSize',15)
+xlabel('Blue whale population','FontSize',15)
+ylabel('Fin whale population','FontSize',15)
+hold off
 gradsmat = [2*r(1)/K(1) a(1)+a(2); a(1)+a(2) 2*r(2)/K(2)];
 maxspot = gradsmat\r';
+quiver(xold,yold,gradX,gradY)
+title('Whale growth rates','FontSize',15)
+xlabel('Blue whale population','FontSize',15)
+ylabel('Fin whale population','FontSize',15)
 x=[floor(maxspot(1)); floor(maxspot(1))+1; floor(maxspot(1)); floor(maxspot(1))+1];
 y=[floor(maxspot(2)); floor(maxspot(2))+1; floor(maxspot(2))+1; floor(maxspot(2))];
 nearvals = gradXY(x,y,r,K,a);
 
 
-%quiver(x,y,gradX,gradY)
+
 % hold on
 % magnit = ((x.^2)+(y.^2)).^0.5;
 % contour(x,y,magnit)
@@ -52,9 +85,13 @@ fig = figure;
 hax = axes;
 hold on
 plot(y1)
-plot(y2)
-plot(ylimVal*ones(1,length(y1)), 'r')
-line([xlimVal xlimVal],get(hax,'YLim'),'Color',[1 0 0])
+plot(y2,'r')
+quiver(xold,yold,gradX,gradY,'>')
+title('Feasible region of whale populations')
+xlabel('Blue whale population')
+ylabel('Fin whale population')
+%plot(ylimVal*ones(1,length(y1)), 'r')
+%line([xlimVal xlimVal],get(hax,'YLim'),'Color',[1 0 0])
 
 
 % problem 7
