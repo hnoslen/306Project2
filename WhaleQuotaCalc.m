@@ -1,5 +1,9 @@
-% Whaling quota script
-% A script to calculate optimal whaling quotas
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Whale Quota Script
+%%% Henry Nelson, Valerie McGraw, Tristan Knoth
+%%% 3/8/16
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 % Input variables - Change these as needed
 r = [0.05 0.08];% Intrinsic growth rates for blue and fin whales respectivly
@@ -8,7 +12,7 @@ a = [10^-8 10^-8];% Competition coefficient for blue and fin whales respectivly
 prices = [12000 6000];% Market price for blue and fin whales respectivly
 
 % The population of each whale must be less than carrying capacity
-currentPopulation = [100000 300000];% current population of blue and fin whales respectivly
+currentPopulation = [25000 75000];% current population of blue and fin whales respectivly
 
 isconstrained = true;% Are there minimum desired populations?
 constraints = [K(1)/2 K(2)/2];% what are the minimum desired populations?
@@ -16,11 +20,16 @@ simStep = 0.1;% steps between possible kill rates (smaller is more accurate but 
 
 
 % Functions for use in the script - DO NOT ALTER
-dx = @(x,y,r1,k1,a1) (r1*x.*(1-(x/k1)))-(a1*x.*y);
-dy = @(x,y,r2,k2,a2) (r2*y.*(1-(y/k2)))-(a2*x.*y);
-populationChange = @(p,r,k,a) [dx(p(1),p(2),r(1),k(1),a(1)); dy(p(1),p(2),r(2),k(2),a(2))];
-profitFunc = @(x,y,r,k,a, priceVec) priceVec(1)*dx(x,y,r(1),k(1),a(1))+priceVec(2)*dy(x,y,r(2),k(2),a(2));
-backupOptimum = @(coor,r,k,a,p) ((p(coor)*r(coor))-(k(coor)/2)*(p(1)*a(1)+p(2)*a(2)))/(2*p(coor)*(r(coor)/k(coor)));
+dx = @(x,y,r1,k1,a1) (r1*x.*(1-(x/k1)))-(a1*x.*y); % Blue whale growth rate
+dy = @(x,y,r2,k2,a2) (r2*y.*(1-(y/k2)))-(a2*x.*y); % Fin whale growth rate
+populationChange = @(p,r,k,a) [dx(p(1),p(2),r(1),k(1),a(1)); dy(p(1),p(2),r(2),k(2),a(2))]; 
+profitFunc = @(x,y,r,k,a, priceVec) priceVec(1)*dx(x,y,r(1),k(1),a(1))+priceVec(2)*dy(x,y,r(2),k(2),a(2)); 
+backupOptimum = @(coor,r,k,a,p) ((p(coor)*r(coor))-(k(coor)/2)*(p(1)*a(1)+p(2)*a(2)))/(2*p(coor)*(r(coor)/k(coor))); 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Computations
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Calculate global profit maximum
 profitplace = prices'.*r';
@@ -94,11 +103,16 @@ elseif currentPopulation(2)==popsToMaxProfit(2)
     harvest(2) = thisYear(2);
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Simulation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 if any((currentPopulation<popsToMaxProfit'))
     % Decide how much to hunt by running simulation
     display(sprintf('Running simulation to find best course of action...\n'))
     records = zeros(1,3);
     record_inc = 1;
+    % Try kill rates from 0 to .99 of growth rate
     for startingKill = 0:simStep:0.99
         timestep = 1;
         pops = currentPopulation';
@@ -106,6 +120,7 @@ if any((currentPopulation<popsToMaxProfit'))
         yearsToProfitPoint = 0;
         while true
             popDelta = populationChange(pops,r,K,a);
+            % Set kill rates
             killRates = startingKill*popDelta;
             if killRates(1)<0
                 killRates(1) = 0;
@@ -113,21 +128,26 @@ if any((currentPopulation<popsToMaxProfit'))
             if killRates(2)<0
                 killRates(2) = 0;
             end
-            
+            % Adjust populations according to growth rate and kill rates
             pops = pops+popDelta-killRates;
+            % Compute profit
             profit = profit + sum(prices'.*killRates);
+            % Increment time
             yearsToProfitPoint= yearsToProfitPoint + 1;
+            % Break if we have reached optimal populations
             if all(pops>=popsToMaxProfit)
                 break;
             end
         end
+        % Record data
         records(record_inc, 1) = startingKill;
         records(record_inc, 2) = profit;
         records(record_inc, 3) = yearsToProfitPoint;
         record_inc = record_inc +1;
     end
-    
+    % Compute number of years below optimal populations
     missedTimeAtMaximum = records(:,3)-records(1,3);
+    % Compute opportunity costs
     missedProfit = profitFunc(popsToMaxProfit(1),popsToMaxProfit(2),r,K,a,prices)*missedTimeAtMaximum;
     
     display(sprintf('Harvest Fraction'))
